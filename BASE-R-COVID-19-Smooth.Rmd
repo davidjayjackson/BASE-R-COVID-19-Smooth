@@ -1,0 +1,83 @@
+---
+title: 'Base R: Smooth Methods Part 1'
+author: "David J Jackson"
+date: "8/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+rm(list=ls())
+EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-08-03.csv")
+EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
+EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
+EUCOVID <- subset(EUCOVID,dateRep >="2020-03-01")
+```
+
+```{r,echo=FALSE}
+ DE <- subset(EUCOVID,geoId =="DE")
+# FR <- subset(EUCOVID,geoId =="FR")
+UK <- subset(EUCOVID,geoId =="UK")
+# PL <- subset(EUCOVID,geoId =="PL")
+# IT <- subt(EUCOVID,geoId =="PL")
+ES<- subset(EUCOVID,geoId =="ES")
+# EUCOMBINED <- rbind(DE,FR,IT,PL,UK)
+summary(ES$cases)
+summary(ES$deaths)
+```
+
+## Part 1: Intro to Smoothing(Base R)
+### Simple (non-moving) AveargeL Weekly and Monthly
+```{r}
+ES$Month <- as.Date(cut(ES$dateRep,
+  breaks = "month"))
+ES$Week <- as.Date(cut(ES$dateRep,
+  breaks = "week",
+  start.on.monday = FALSE))
+```
+
+### Plot of Daily Spain's COVID-19 Cases and Deaths
+
+```{r}
+
+plot(ES$dateRep,ES$cases,type='l', main="ES Daily COVID-19 Cases")
+plot(ES$dateRep,ES$deaths,type='l', main="ES Daily COVID-19 Deaths")
+```
+
+#### Weekly Mean Cases and Deaths
+
+```{r}
+ESMC <-  aggregate(x=ES$cases,by=list(ES$Week),FUN=mean)
+ESMD <-  aggregate(x=ES$deaths,by=list(ES$Week),FUN=mean)
+
+plot(ES$dateRep,ES$cases,type='l', main="ES Daily COVID-19 Cases",col="red")
+lines(ESMC$Group.1,ESMC$x,col="blue")
+
+plot(ES$dateRep,ES$deaths,type='l', main="ES Daily COVID-19 Deaths",col="red")
+lines(ESMD$Group.1,ESMD$x,col="blue")
+barplot(x~Group.1,ESMC)
+
+
+```
+
+#### Monthly Mean Cases and Deaths
+
+
+```{r}
+ESMOC <-  aggregate(x=ES$cases,by=list(ES$Month),FUN=mean)
+ESMOD <-  aggregate(x=ES$deaths,by=list(ES$Month),FUN=mean)
+
+plot(ES$dateRep,ES$cases,type='l', main="ES Daily COVID-19 Cases",col="red")
+lines(ESMOC$Group.1,ESMOC$x,col="blue")
+
+plot(ES$dateRep,ES$deaths,type='l', main="ES Daily COVID-19 Deaths",col="red")
+lines(ESMOD$Group.1,ESMOD$x,col="blue")
+```
+```{r}
+plot(ESMC$Group.1,ESMC$x,type="l",col="blue")
+lines(ESMOC$Group.1,ESMOC$x,col="red")
+barplot(x~Group.1,ESMOC)
+```
+
